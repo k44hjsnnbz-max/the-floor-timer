@@ -1,0 +1,1359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0,
+      maximum-scale=1.0, user-scalable=no">
+
+<title>THE FLOOR - Duel</title>
+
+<style>
+
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #050505;
+    color: white;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+    user-select: none;
+}
+
+/* =========================
+   MAIN SCREEN
+========================= */
+
+.game {
+    width: 100vw;
+    height: 100vh;
+
+    display: flex;
+    flex-direction: column;
+
+    background:
+        radial-gradient(
+            circle at center,
+            #242424 0%,
+            #101010 45%,
+            #030303 100%
+        );
+}
+
+/* =========================
+   HEADER
+========================= */
+
+.header {
+    height: 10vh;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-bottom: 2px solid #333;
+
+    flex-shrink: 0;
+}
+
+.title {
+    font-size: clamp(28px, 5vw, 60px);
+    font-weight: 900;
+
+    letter-spacing: 10px;
+}
+
+/* =========================
+   PLAYERS
+========================= */
+
+.players {
+    flex: 1;
+
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+
+    min-height: 0;
+}
+
+.player {
+    position: relative;
+
+    display: flex;
+    flex-direction: column;
+
+    align-items: center;
+    justify-content: center;
+
+    gap: 15px;
+
+    padding: 15px;
+
+    transition: all .15s ease;
+}
+
+.player:first-child {
+    border-right: 2px solid #333;
+}
+
+/* Active player */
+
+.player.active {
+    background:
+        radial-gradient(
+            circle at center,
+            rgba(255,255,255,.08),
+            transparent 65%
+        );
+}
+
+.player.active::before {
+    content: "YOUR TURN";
+
+    position: absolute;
+
+    top: 20px;
+
+    font-size: 14px;
+
+    font-weight: 900;
+
+    letter-spacing: 5px;
+
+    opacity: .8;
+
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    50% {
+        opacity: .25;
+    }
+}
+
+/* =========================
+   PLAYER INFO
+========================= */
+
+.name {
+    font-size: clamp(18px, 3vw, 36px);
+
+    font-weight: 900;
+
+    letter-spacing: 3px;
+
+    cursor: pointer;
+}
+
+.name:hover {
+    opacity: .7;
+}
+
+.score {
+    font-size: 15px;
+
+    letter-spacing: 3px;
+
+    opacity: .5;
+}
+
+/* =========================
+   TIMER
+========================= */
+
+.timer {
+    font-size: clamp(65px, 10vw, 135px);
+
+    font-weight: 900;
+
+    line-height: 1;
+
+    font-variant-numeric: tabular-nums;
+
+    letter-spacing: -4px;
+
+    text-shadow:
+        0 5px 25px rgba(0,0,0,.8);
+}
+
+.timer.warning {
+    animation: warningPulse .5s infinite alternate;
+}
+
+@keyframes warningPulse {
+
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: .45;
+    }
+}
+
+/* =========================
+   BUZZER
+========================= */
+
+.buzzer {
+
+    width: clamp(150px, 20vw, 280px);
+    height: clamp(150px, 20vw, 280px);
+
+    border-radius: 50%;
+
+    border: 8px solid #333;
+
+    background:
+        radial-gradient(
+            circle at 35% 25%,
+            #ff6262,
+            #c00000 55%,
+            #650000
+        );
+
+    color: white;
+
+    font-size: clamp(25px, 4vw, 50px);
+
+    font-weight: 900;
+
+    cursor: pointer;
+
+    box-shadow:
+        inset 0 10px 20px rgba(255,255,255,.15),
+        0 15px 40px rgba(0,0,0,.8);
+
+    transition:
+        transform .08s,
+        filter .08s;
+}
+
+.buzzer:active {
+    transform: scale(.90);
+
+    filter: brightness(1.5);
+}
+
+.buzzer:disabled {
+    opacity: .18;
+
+    filter: grayscale(1);
+
+    cursor: default;
+}
+
+/* =========================
+   CONTROLS
+========================= */
+
+.controls {
+
+    height: 14vh;
+
+    min-height: 90px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 10px;
+
+    border-top: 2px solid #333;
+
+    flex-shrink: 0;
+}
+
+button,
+select,
+input {
+
+    font-family: inherit;
+}
+
+.control {
+
+    background: #191919;
+
+    color: white;
+
+    border: 1px solid #444;
+
+    border-radius: 7px;
+
+    padding: 13px 20px;
+
+    font-size: 14px;
+
+    font-weight: 800;
+
+    cursor: pointer;
+}
+
+.control:active {
+    transform: scale(.96);
+}
+
+select,
+input {
+
+    background: #191919;
+
+    color: white;
+
+    border: 1px solid #444;
+
+    border-radius: 7px;
+
+    padding: 13px;
+
+    font-size: 14px;
+
+    font-weight: 700;
+}
+
+input {
+    width: 90px;
+}
+
+/* =========================
+   OVERLAY
+========================= */
+
+.overlay {
+
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 100;
+
+    display: none;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: center;
+
+    text-align: center;
+
+    background:
+        radial-gradient(
+            circle,
+            #252525,
+            #050505 70%
+        );
+}
+
+.overlay.show {
+    display: flex;
+}
+
+.result-label {
+
+    font-size: clamp(16px, 3vw, 30px);
+
+    letter-spacing: 8px;
+
+    opacity: .5;
+
+    margin-bottom: 20px;
+}
+
+.result {
+
+    font-size: clamp(55px, 12vw, 150px);
+
+    font-weight: 900;
+
+    letter-spacing: 5px;
+}
+
+.result.win {
+    animation: winnerIn .4s ease-out;
+}
+
+@keyframes winnerIn {
+
+    from {
+        transform: scale(.6);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.result-sub {
+
+    margin-top: 15px;
+
+    font-size: 18px;
+
+    letter-spacing: 4px;
+
+    opacity: .5;
+}
+
+.next {
+
+    margin-top: 45px;
+
+    padding: 18px 50px;
+
+    border: none;
+
+    border-radius: 8px;
+
+    background: white;
+
+    color: black;
+
+    font-size: 20px;
+
+    font-weight: 900;
+
+    cursor: pointer;
+}
+
+/* =========================
+   START SCREEN
+========================= */
+
+.start-screen {
+
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 200;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: center;
+
+    background: #050505;
+
+    text-align: center;
+}
+
+.start-screen.hidden {
+    display: none;
+}
+
+.start-title {
+
+    font-size: clamp(50px, 12vw, 150px);
+
+    font-weight: 900;
+
+    letter-spacing: 12px;
+}
+
+.start-sub {
+
+    margin-top: 15px;
+
+    font-size: 18px;
+
+    letter-spacing: 6px;
+
+    opacity: .45;
+}
+
+.start-button {
+
+    margin-top: 50px;
+
+    padding: 20px 70px;
+
+    border: none;
+
+    border-radius: 8px;
+
+    background: white;
+
+    color: black;
+
+    font-size: 24px;
+
+    font-weight: 900;
+
+    cursor: pointer;
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 700px) {
+
+    .title {
+        letter-spacing: 5px;
+    }
+
+    .player {
+        gap: 10px;
+    }
+
+    .player:first-child {
+        border-right: 1px solid #333;
+    }
+
+    .buzzer {
+        width: min(35vw, 190px);
+        height: min(35vw, 190px);
+        border-width: 5px;
+    }
+
+    .controls {
+        gap: 5px;
+        flex-wrap: wrap;
+        padding: 5px;
+    }
+
+    .control,
+    select,
+    input {
+        padding: 9px 10px;
+        font-size: 11px;
+    }
+
+    .timer {
+        letter-spacing: -2px;
+    }
+
+}
+
+</style>
+</head>
+
+
+<body>
+
+
+<div class="game">
+
+    <!-- HEADER -->
+
+    <div class="header">
+        <div class="title">
+            THE FLOOR
+        </div>
+    </div>
+
+
+    <!-- PLAYERS -->
+
+    <div class="players">
+
+        <!-- PLAYER 1 -->
+
+        <div
+            class="player active"
+            id="player1">
+
+            <div
+                class="name"
+                id="name1"
+                onclick="renamePlayer(1)">
+                PLAYER 1
+            </div>
+
+            <div class="score">
+                WINS:
+                <span id="score1">0</span>
+            </div>
+
+            <div
+                class="timer"
+                id="timer1">
+                45.0
+            </div>
+
+            <button
+                class="buzzer"
+                id="buzzer1"
+                onclick="buzz(1)">
+                BUZZ
+            </button>
+
+        </div>
+
+
+        <!-- PLAYER 2 -->
+
+        <div
+            class="player"
+            id="player2">
+
+            <div
+                class="name"
+                id="name2"
+                onclick="renamePlayer(2)">
+                PLAYER 2
+            </div>
+
+            <div class="score">
+                WINS:
+                <span id="score2">0</span>
+            </div>
+
+            <div
+                class="timer"
+                id="timer2">
+                45.0
+            </div>
+
+            <button
+                class="buzzer"
+                id="buzzer2"
+                onclick="buzz(2)">
+                BUZZ
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- CONTROLS -->
+
+    <div class="controls">
+
+        <select id="preset">
+
+            <option value="15">
+                15 SEC
+            </option>
+
+            <option value="30">
+                30 SEC
+            </option>
+
+            <option value="45"
+                    selected>
+                45 SEC
+            </option>
+
+            <option value="60">
+                60 SEC
+            </option>
+
+            <option value="90">
+                90 SEC
+            </option>
+
+            <option value="custom">
+                CUSTOM
+            </option>
+
+        </select>
+
+
+        <input
+            id="customTime"
+            type="number"
+            min="1"
+            max="600"
+            placeholder="Seconds">
+
+
+        <button
+            class="control"
+            onclick="startRound()">
+            START DUEL
+        </button>
+
+
+        <button
+            class="control"
+            onclick="resetRound()">
+            RESET
+        </button>
+
+
+        <button
+            class="control"
+            onclick="goFullscreen()">
+            FULLSCREEN
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- START SCREEN -->
+
+<div
+    class="start-screen"
+    id="startScreen">
+
+    <div class="start-title">
+        DUEL
+    </div>
+
+    <div class="start-sub">
+        GET READY
+    </div>
+
+    <button
+        class="start-button"
+        onclick="startRound()">
+        START
+    </button>
+
+</div>
+
+
+<!-- RESULT -->
+
+<div
+    class="overlay"
+    id="resultScreen">
+
+    <div class="result-label">
+        DUEL COMPLETE
+    </div>
+
+    <div
+        class="result"
+        id="result">
+        PLAYER 1
+    </div>
+
+    <div
+        class="result-sub"
+        id="resultSub">
+        WINS
+    </div>
+
+    <button
+        class="next"
+        onclick="nextRound()">
+        NEXT DUEL
+    </button>
+
+</div>
+
+
+<script>
+
+/* =========================================
+   GAME VARIABLES
+========================================= */
+
+let maxTime = 45;
+
+let remaining = {
+    1: 45,
+    2: 45
+};
+
+let activePlayer = 1;
+
+let running = false;
+
+let lastTime = null;
+
+let animationFrame = null;
+
+let scores = {
+    1: 0,
+    2: 0
+};
+
+
+/* =========================================
+   AUDIO
+========================================= */
+
+let audioContext = null;
+
+function initAudio() {
+
+    if (!audioContext) {
+
+        audioContext =
+            new (
+                window.AudioContext ||
+                window.webkitAudioContext
+            )();
+    }
+
+    if (
+        audioContext.state === "suspended"
+    ) {
+        audioContext.resume();
+    }
+}
+
+
+function sound(
+    frequency,
+    duration,
+    type = "sine"
+) {
+
+    initAudio();
+
+    const oscillator =
+        audioContext.createOscillator();
+
+    const gain =
+        audioContext.createGain();
+
+    oscillator.type = type;
+
+    oscillator.frequency.value =
+        frequency;
+
+    gain.gain.setValueAtTime(
+        0.15,
+        audioContext.currentTime
+    );
+
+    gain.gain.exponentialRampToValueAtTime(
+        0.001,
+        audioContext.currentTime + duration
+    );
+
+    oscillator.connect(gain);
+
+    gain.connect(
+        audioContext.destination
+    );
+
+    oscillator.start();
+
+    oscillator.stop(
+        audioContext.currentTime + duration
+    );
+}
+
+
+/* =========================================
+   GET TIME SETTING
+========================================= */
+
+function getSelectedTime() {
+
+    const preset =
+        document.getElementById(
+            "preset"
+        ).value;
+
+    if (preset === "custom") {
+
+        let custom =
+            parseFloat(
+                document.getElementById(
+                    "customTime"
+                ).value
+            );
+
+        if (
+            isNaN(custom) ||
+            custom <= 0
+        ) {
+            custom = 45;
+        }
+
+        return custom;
+    }
+
+    return parseFloat(preset);
+}
+
+
+/* =========================================
+   START ROUND
+========================================= */
+
+function startRound() {
+
+    if (running) return;
+
+    initAudio();
+
+    maxTime =
+        getSelectedTime();
+
+    remaining[1] = maxTime;
+    remaining[2] = maxTime;
+
+    activePlayer = 1;
+
+    running = true;
+
+    lastTime = performance.now();
+
+    document
+        .getElementById("startScreen")
+        .classList.add("hidden");
+
+    document
+        .getElementById("resultScreen")
+        .classList.remove("show");
+
+    updateDisplay();
+
+    updateActivePlayer();
+
+    sound(800, .12);
+
+    animationFrame =
+        requestAnimationFrame(
+            gameLoop
+        );
+}
+
+
+/* =========================================
+   GAME LOOP
+========================================= */
+
+function gameLoop(timestamp) {
+
+    if (!running) return;
+
+    const elapsed =
+        (timestamp - lastTime) / 1000;
+
+    lastTime = timestamp;
+
+    remaining[activePlayer] -= elapsed;
+
+    if (
+        remaining[activePlayer] <= 0
+    ) {
+
+        remaining[activePlayer] = 0;
+
+        updateDisplay();
+
+        lose(activePlayer);
+
+        return;
+    }
+
+    updateDisplay();
+
+    animationFrame =
+        requestAnimationFrame(
+            gameLoop
+        );
+}
+
+
+/* =========================================
+   BUZZER
+========================================= */
+
+function buzz(player) {
+
+    if (!running) return;
+
+    if (player !== activePlayer) {
+
+        sound(150, .08);
+
+        return;
+    }
+
+    /*
+       IMPORTANT:
+
+       The current player's timer
+       freezes.
+
+       The other player's timer
+       becomes active.
+    */
+
+    activePlayer =
+        player === 1 ? 2 : 1;
+
+    lastTime =
+        performance.now();
+
+    updateActivePlayer();
+
+    sound(1100, .12);
+
+    setTimeout(() => {
+
+        if (running) {
+            sound(1500, .15);
+        }
+
+    }, 100);
+}
+
+
+/* =========================================
+   UPDATE ACTIVE SIDE
+========================================= */
+
+function updateActivePlayer() {
+
+    document
+        .getElementById("player1")
+        .classList.toggle(
+            "active",
+            activePlayer === 1
+        );
+
+    document
+        .getElementById("player2")
+        .classList.toggle(
+            "active",
+            activePlayer === 2
+        );
+
+    document
+        .getElementById("buzzer1")
+        .disabled =
+            !running ||
+            activePlayer !== 1;
+
+    document
+        .getElementById("buzzer2")
+        .disabled =
+            !running ||
+            activePlayer !== 2;
+}
+
+
+/* =========================================
+   DISPLAY TIMER
+========================================= */
+
+function updateDisplay() {
+
+    for (let player = 1;
+         player <= 2;
+         player++) {
+
+        const timer =
+            document.getElementById(
+                "timer" + player
+            );
+
+        let value =
+            Math.max(
+                0,
+                remaining[player]
+            );
+
+        timer.textContent =
+            value.toFixed(1);
+
+        timer.classList.remove(
+            "warning"
+        );
+
+        if (
+            value <= 10 &&
+            value > 0 &&
+            activePlayer === player
+        ) {
+
+            timer.classList.add(
+                "warning"
+            );
+        }
+    }
+}
+
+
+/* =========================================
+   PLAYER LOSES
+========================================= */
+
+function lose(player) {
+
+    running = false;
+
+    cancelAnimationFrame(
+        animationFrame
+    );
+
+    const winner =
+        player === 1 ? 2 : 1;
+
+    scores[winner]++;
+
+    document.getElementById(
+        "score" + winner
+    ).textContent =
+        scores[winner];
+
+    document.getElementById(
+        "result"
+    ).textContent =
+        document.getElementById(
+            "name" + winner
+        ).textContent;
+
+    document.getElementById(
+        "resultSub"
+    ).textContent =
+        "WINS";
+
+    document
+        .getElementById("result")
+        .classList.add("win");
+
+    document
+        .getElementById("resultScreen")
+        .classList.add("show");
+
+    document.getElementById(
+        "buzzer1"
+    ).disabled = true;
+
+    document.getElementById(
+        "buzzer2"
+    ).disabled = true;
+
+    sound(250, .4, "sawtooth");
+
+    setTimeout(() => {
+
+        sound(500, .5);
+
+    }, 250);
+}
+
+
+/* =========================================
+   NEXT ROUND
+========================================= */
+
+function nextRound() {
+
+    document
+        .getElementById("resultScreen")
+        .classList.remove("show");
+
+    document
+        .getElementById("result")
+        .classList.remove("win");
+
+    resetTimers();
+
+    startRound();
+}
+
+
+/* =========================================
+   RESET
+========================================= */
+
+function resetRound() {
+
+    running = false;
+
+    cancelAnimationFrame(
+        animationFrame
+    );
+
+    resetTimers();
+
+    document
+        .getElementById("resultScreen")
+        .classList.remove("show");
+
+    document
+        .getElementById("startScreen")
+        .classList.remove("hidden");
+
+    updateActivePlayer();
+
+    sound(400, .1);
+}
+
+
+/* =========================================
+   RESET TIMERS
+========================================= */
+
+function resetTimers() {
+
+    maxTime =
+        getSelectedTime();
+
+    remaining[1] = maxTime;
+    remaining[2] = maxTime;
+
+    activePlayer = 1;
+
+    lastTime = null;
+
+    updateDisplay();
+
+    updateActivePlayer();
+}
+
+
+/* =========================================
+   RENAME PLAYER
+========================================= */
+
+function renamePlayer(player) {
+
+    const current =
+        document.getElementById(
+            "name" + player
+        ).textContent;
+
+    const newName =
+        prompt(
+            "Enter player name:",
+            current
+        );
+
+    if (
+        newName &&
+        newName.trim()
+    ) {
+
+        document.getElementById(
+            "name" + player
+        ).textContent =
+            newName
+                .trim()
+                .toUpperCase();
+    }
+}
+
+
+/* =========================================
+   FULLSCREEN
+========================================= */
+
+function goFullscreen() {
+
+    const element =
+        document.documentElement;
+
+    if (
+        element.requestFullscreen
+    ) {
+
+        element.requestFullscreen();
+
+    } else if (
+        element.webkitRequestFullscreen
+    ) {
+
+        element.webkitRequestFullscreen();
+    }
+}
+
+
+/* =========================================
+   KEYBOARD CONTROLS
+========================================= */
+
+document.addEventListener(
+    "keydown",
+    function(event) {
+
+        if (
+            event.key.toLowerCase() === "a"
+        ) {
+
+            buzz(1);
+        }
+
+        if (
+            event.key.toLowerCase() === "l"
+        ) {
+
+            buzz(2);
+        }
+
+        if (
+            event.code === "Space"
+        ) {
+
+            event.preventDefault();
+
+            if (!running) {
+                startRound();
+            }
+        }
+    }
+);
+
+
+/* =========================================
+   TIME SETTING CHANGE
+========================================= */
+
+document
+    .getElementById("preset")
+    .addEventListener(
+        "change",
+        function() {
+
+            if (!running) {
+
+                resetTimers();
+            }
+        }
+    );
+
+
+document
+    .getElementById("customTime")
+    .addEventListener(
+        "input",
+        function() {
+
+            if (!running) {
+
+                if (
+                    document.getElementById(
+                        "preset"
+                    ).value === "custom"
+                ) {
+
+                    resetTimers();
+                }
+            }
+        }
+    );
+
+
+/* =========================================
+   INITIALIZE
+========================================= */
+
+resetTimers();
+
+</script>
+
+</body>
+</html>
